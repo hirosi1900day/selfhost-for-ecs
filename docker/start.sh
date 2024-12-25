@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+export GH_TOKEN="$(./github_app_token.sh)"
 
 if [ -n "$ORGANIZATION" ]; then
   echo "get Organization token"
