@@ -9,8 +9,11 @@ generate_jwt() {
   header=$(printf '{"alg":"RS256","typ":"JWT"}' | openssl enc -base64 -A | tr '+/' '-_' | tr -d '=')
   payload=$(printf '{"iss":"%s","iat":%s,"exp":%s}' "$APP_ID" "$iat" "$exp" | openssl enc -base64 -A | tr '+/' '-_' | tr -d '=')
 
+  # ENCODED_PRIVATE_KEY を Base64 デコードして使用
+  decoded_private_key=$(echo "$ENCODED_PRIVATE_KEY" | base64 -d)
+
   signature=$(printf '%s.%s' "$header" "$payload" | \
-    openssl dgst -binary -sha256 -sign "$PRIVATE_KEY" | \
+    openssl dgst -binary -sha256 -sign <(echo "$decoded_private_key") | \
     openssl enc -base64 -A | tr '+/' '-_' | tr -d '=')
 
   echo "$header.$payload.$signature"
