@@ -1,0 +1,7 @@
+services:
+  app:
+    build:
+      context: docker
+    env_file:
+      - docker/.env
+    platform: linux/amd64

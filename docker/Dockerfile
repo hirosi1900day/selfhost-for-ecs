@@ -9,7 +9,7 @@ RUN apt-get update -y \
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     curl jq build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip \
-    ca-certificates gnupg lsb-release
+    ca-certificates gnupg lsb-release libicu-dev
 
 # Docker CLI installation
 RUN mkdir -p /etc/apt/keyrings \
@@ -32,8 +32,9 @@ RUN cd /home/docker && mkdir actions-runner && cd actions-runner \
 RUN chown -R docker ~docker && /home/docker/actions-runner/bin/installdependencies.sh
 
 COPY start.sh start.sh
-
+COPY github_app_token.sh github_app_token.sh
 RUN chmod +x start.sh
+RUN chmod +x github_app_token.sh
 
 USER docker
 
