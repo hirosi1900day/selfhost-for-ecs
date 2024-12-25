@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-# GitHub App に関連する変数
-APP_ID="your_app_id"
-PRIVATE_KEY="path_to_your_private_key.pem"
-GITHUB_REPOSITORY="owner/repo"
-
 # GitHub CLI を使用して JWT を生成する関数
 generate_jwt() {
   now=$(date '+%s')
@@ -28,7 +23,7 @@ jwt=$(generate_jwt)
 installation_id=$(gh api \
   -H "Authorization: Bearer $jwt" \
   -H "Accept: application/vnd.github+json" \
-  "/repos/$GITHUB_REPOSITORY/installation" | jq -r '.id')
+  "/repos/$REPO/$ORGANIZATION/installation" | jq -r '.id')
 
 if [ -z "$installation_id" ]; then
   echo "Failed to fetch installation ID" >&2
