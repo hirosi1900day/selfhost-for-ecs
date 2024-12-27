@@ -35,6 +35,11 @@ COPY start.sh start.sh
 COPY github_app_token.sh github_app_token.sh
 RUN chmod +x start.sh
 RUN chmod +x github_app_token.sh
+USER root
+
+# sudo をインストールし、docker ユーザーに権限を付与
+RUN apt-get update && apt-get install -y sudo \
+    && echo "docker ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 USER docker
 

@@ -22,6 +22,8 @@ else
   ./config.sh --url https://github.com/${OWNER}/${REPO} --token ${REG_TOKEN}  
 fi
 
+sudo chown docker:docker /run/user/1000/docker.sock
+
 cleanup() {
     echo "Removing runner..."
     ./config.sh remove --unattended --token ${REG_TOKEN}

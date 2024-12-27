@@ -5,3 +5,16 @@ services:
     env_file:
       - docker/.env
     platform: linux/amd64
+    environment:
+      - DOCKER_HOST=unix:///run/user/1000/docker.sock
+    volumes:
+      - docker-socket:/run/user/1000
+  
+  sidecar:
+    image: docker:rc-dind
+    privileged: true
+    platform: linux/amd64
+    volumes:
+      - docker-socket:/var/run
+volumes:
+  docker-socket:
