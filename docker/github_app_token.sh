@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [[ -z "$APP_ID" || -z "$OWNER" || -z "$REPO" || -z "$PRIVATE_KEY_BASE64" ]]; then
   echo "ERROR: APP_ID, OWNER, REPO, PRIVATE_KEY_BASE64 環境変数を設定してください"
   exit 1

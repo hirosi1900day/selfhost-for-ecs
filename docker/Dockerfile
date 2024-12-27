@@ -1,41 +1,38 @@
-FROM ubuntu:24.04
+FROM cruizba/ubuntu-dind:latest
 
 ARG RUNNER_VERSION="2.321.0"
 
+# 必要な依存パッケージをインストール
 RUN apt-get update -y \
     && apt-get upgrade -y \
-    && groupadd -g 994 docker \
-    && useradd -m -g 994 docker
-
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
     curl jq build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip \
-    ca-certificates gnupg lsb-release libicu-dev
+    ca-certificates gnupg lsb-release libicu-dev iptables \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Docker CLI installation
-RUN mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
-    && apt-get update \
-    && apt-get install -y docker-ce-cli
-
-# GitHub CLI (gh) installation
+# GitHub CLI (gh) のインストール
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
     && apt-get update \
-    && apt-get install -y gh
+    && apt-get install -y gh \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Actions Runner installation
-RUN cd /home/docker && mkdir actions-runner && cd actions-runner \
+# Actions Runner のインストール
+RUN mkdir -p /home/docker/actions-runner \
+    && cd /home/docker/actions-runner \
     && curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
-    && tar xzf ./actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
+    && tar xzf ./actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
+    && chown -R root:root /home/docker/actions-runner \
+    && /home/docker/actions-runner/bin/installdependencies.sh
 
-RUN chown -R docker ~docker && /home/docker/actions-runner/bin/installdependencies.sh
+# スクリプトのコピーと権限設定
+COPY start.sh /home/docker/start.sh
+COPY github_app_token.sh /home/docker/github_app_token.sh
+RUN chmod +x /home/docker/start.sh /home/docker/github_app_token.sh
 
-COPY start.sh start.sh
-COPY github_app_token.sh github_app_token.sh
-RUN chmod +x start.sh
-RUN chmod +x github_app_token.sh
+# 実行ユーザーの指定 (root のままで OK)
+USER root
 
-USER docker
-
-ENTRYPOINT ["./start.sh"]
+CMD ["/home/docker/start.sh"]
